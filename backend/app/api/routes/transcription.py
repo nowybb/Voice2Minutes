@@ -1,6 +1,14 @@
 from typing import Annotated
 
-from fastapi import APIRouter, File, Form, HTTPException, UploadFile, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    File,
+    Form,
+    HTTPException,
+    UploadFile,
+    status,
+)
 from pydantic import ValidationError
 
 from app.schemas.transcription import TranscriptionOptions
@@ -10,6 +18,9 @@ from app.services.file_service import (
     save_upload_file,
 )
 from app.services.job_service import job_service
+from app.services.transcription_job_service import (
+    process_transcription_job,
+)
 
 
 router = APIRouter(
@@ -24,10 +35,11 @@ router = APIRouter(
     summary="음성 파일 전사 작업 생성",
     description=(
         "회의 음성 파일을 업로드하고 전사 작업을 생성합니다. "
-        "실제 음성 전사는 이후 백그라운드 작업에서 처리합니다."
+        "RTZR 전사 요청은 백그라운드에서 처리됩니다."
     ),
 )
 async def create_transcription(
+    background_tasks: BackgroundTasks,
     file: Annotated[
         UploadFile,
         File(description="전사할 회의 음성 파일"),
@@ -71,6 +83,11 @@ async def create_transcription(
             stored_path=str(saved_file["stored_path"]),
             file_size=int(saved_file["size"]),
             options=options.model_dump(),
+        )
+
+        background_tasks.add_task(
+            process_transcription_job,
+            job["job_id"],
         )
 
         return {
