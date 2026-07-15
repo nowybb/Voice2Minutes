@@ -2,6 +2,7 @@
 음성을 텍스트로 변환하고 회의록을 요약해주는 웹 프로젝트 레퍼지토리입니다.
 
 **Author** : 나연우
+
 **GitHub** : https://github.com/nowybb
 
 ---
