@@ -228,12 +228,18 @@ AI 요약
 
 # 메인 화면
 
-> 나중에 추가
+
+<img width="1488" height="811" alt="메인화면1" src="https://github.com/user-attachments/assets/7df9714c-f9a2-4cb3-b7a4-37579632adf1" />
+<img width="1481" height="828" alt="메인화면2" src="https://github.com/user-attachments/assets/b38c1b9d-d832-4d45-93d1-b58806120edc" />
+<img width="1493" height="836" alt="메인화면3" src="https://github.com/user-attachments/assets/41af0846-e5a2-4241-9e44-d84a1f332ab5" />
+<img width="1474" height="840" alt="메인화면4" src="https://github.com/user-attachments/assets/b9595e81-c07a-4211-b14c-db8b5a5a9900" />
 
 ---
 
 # 결과 화면
-> 나중에 추가
+<img width="1511" height="763" alt="결과화면1" src="https://github.com/user-attachments/assets/d69761fa-b00c-4763-813f-bcc60f6e563c" />
+<img width="1391" height="641" alt="결과화면3" src="https://github.com/user-attachments/assets/0a891fcc-8042-4453-84c7-f795a17869ff" />
+<img width="1466" height="856" alt="결과화면2" src="https://github.com/user-attachments/assets/078fef0c-62da-4782-b2a2-bf7c9e3705b7" />
 
 ---
 
