@@ -619,7 +619,8 @@ React 결과 화면 출력
 
 테스트 음성
 
-- 무료 음성 데이터
+- AI 허브 무료 음성 데이터
+- https://aihub.or.kr/aihubnews/faq/list.do?currMenu=146&topMenu=104 
 - 약 3분 길이
 
 ---
