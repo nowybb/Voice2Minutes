@@ -17,7 +17,7 @@ from app.services.file_service import (
     delete_file,
     save_upload_file,
 )
-from app.services.job_service import job_service
+from app.services.job_service import JobNotFoundError, job_service
 from app.services.transcription_job_service import (
     process_transcription_job,
 )
@@ -124,5 +124,77 @@ async def create_transcription(
             detail={
                 "code": "FILE_UPLOAD_FAILED",
                 "message": "파일 업로드 처리 중 오류가 발생했습니다.",
+            },
+        ) from exc
+
+
+@router.get(
+    "/{job_id}",
+    summary="전사 작업 상태 조회",
+    description="전사 작업의 현재 상태와 진행 정보를 조회합니다.",
+)
+async def get_transcription_status(job_id: str):
+    try:
+        job = job_service.get_job(job_id)
+
+        progress_map = {
+            "queued": {
+                "step": 1,
+                "total_steps": 4,
+                "label": "전사 작업을 준비하고 있습니다.",
+            },
+            "transcribing": {
+                "step": 2,
+                "total_steps": 4,
+                "label": "음성을 텍스트로 변환하고 있습니다.",
+            },
+            "summarizing": {
+                "step": 3,
+                "total_steps": 4,
+                "label": "전사 결과를 회의록으로 정리하고 있습니다.",
+            },
+            "completed": {
+                "step": 4,
+                "total_steps": 4,
+                "label": "회의록 생성이 완료되었습니다.",
+            },
+            "failed": {
+                "step": 0,
+                "total_steps": 4,
+                "label": "전사 작업에 실패했습니다.",
+            },
+        }
+
+        progress = progress_map.get(
+            job["status"],
+            {
+                "step": 0,
+                "total_steps": 4,
+                "label": "작업 상태를 확인할 수 없습니다.",
+            },
+        )
+
+        data = {
+            **job,
+            "progress": progress,
+        }
+
+        if job["status"] == "completed":
+            data["result_url"] = (
+                f"/api/v1/transcriptions/{job_id}/result"
+            )
+
+        return {
+            "success": True,
+            "data": data,
+            "error": None,
+        }
+
+    except JobNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "code": "JOB_NOT_FOUND",
+                "message": "해당 전사 작업을 찾을 수 없습니다.",
             },
         ) from exc
