@@ -423,9 +423,7 @@ function App() {
               </h1>
 
               <p className="hero-description">
-                음성 파일을 업로드하면 전사부터
-                핵심 요약, 결정 사항, 실행 항목까지
-                한 번에 정리합니다.
+                회의 음성을 업로드하면 전사부터 요약, 실행 항목까지 자동으로 완성합니다.
               </p>
 
               <div className="hero-tags">
@@ -444,7 +442,7 @@ function App() {
               <div className="upload-heading">
                 <div>
                   <p className="upload-step">
-                    01
+                    
                   </p>
 
                   <h2>회의 음성 업로드</h2>
@@ -842,36 +840,303 @@ function App() {
           </section>
         )}
 
-        <section className="value-section">
-          <div className="container value-grid">
-            <article>
-              <span>01</span>
-              <h3>빠른 전사</h3>
-              <p>
-                긴 회의 음성을 RTZR STT로
-                빠르게 텍스트로 변환합니다.
-              </p>
-            </article>
+        {!meetingResult && (
+  <section
+    className="features-section"
+    id="features"
+  >
+    <div className="container">
+      <div className="section-heading">
+        <p className="hero-label">
+          FEATURES
+        </p>
 
-            <article>
-              <span>02</span>
-              <h3>구조화된 회의록</h3>
-              <p>
-                핵심 요약, 결정 사항과 실행
-                항목을 구분해 보여줍니다.
-              </p>
-            </article>
+        <h2>
+          회의 정리를 더 빠르고
+          <br />
+          명확하게 만듭니다.
+        </h2>
 
-            <article>
-              <span>03</span>
-              <h3>바로 활용</h3>
-              <p>
-                생성된 결과를 Markdown
-                회의록으로 저장할 수 있습니다.
-              </p>
-            </article>
+        <p>
+          음성 전사부터 핵심 정리와 결과 저장까지,
+          회의 후 필요한 기능을 한곳에 담았습니다.
+        </p>
+      </div>
+
+      <div className="features-grid">
+        <article className="feature-card">
+          <span className="feature-number">
+            01
+          </span>
+
+          <div className="feature-icon">
+            〽
           </div>
-        </section>
+
+          <h3>빠른 전사</h3>
+
+          <p>
+            긴 회의 음성을 RTZR STT로
+            빠르게 텍스트로 변환합니다.
+          </p>
+        </article>
+
+        <article className="feature-card">
+          <span className="feature-number">
+            02
+          </span>
+
+          <div className="feature-icon">
+            ◉
+          </div>
+
+          <h3>화자 분리</h3>
+
+          <p>
+            발화자를 구분해 누가 어떤 내용을
+            말했는지 쉽게 확인할 수 있습니다.
+          </p>
+        </article>
+
+        <article className="feature-card">
+          <span className="feature-number">
+            03
+          </span>
+
+          <div className="feature-icon">
+            ≡
+          </div>
+
+          <h3>구조화된 회의록</h3>
+
+          <p>
+            핵심 요약, 결정 사항과 실행 항목을
+            구분하여 한눈에 보여줍니다.
+          </p>
+        </article>
+
+        <article className="feature-card">
+          <span className="feature-number">
+            04
+          </span>
+
+          <div className="feature-icon">
+            ↓
+          </div>
+
+          <h3>바로 활용</h3>
+
+          <p>
+            생성된 결과를 Markdown 회의록으로
+            내려받아 바로 활용할 수 있습니다.
+          </p>
+        </article>
+      </div>
+    </div>
+  </section>
+)}
+{!meetingResult && (
+  <>
+    <section
+      className="process-section"
+      id="how-it-works"
+    >
+      <div className="container">
+        <div className="section-heading">
+          <p className="hero-label">
+            HOW IT WORKS
+          </p>
+
+          <h2>
+            음성 파일 하나로
+            <br />
+            회의록이 완성됩니다.
+          </h2>
+
+          <p>
+            업로드부터 전사, 내용 정리,
+            다운로드까지 네 단계로 진행합니다.
+          </p>
+        </div>
+
+        <div className="process-grid">
+          <article className="process-card">
+            <span className="process-number">
+              01
+            </span>
+
+            <div className="process-icon">
+              ↑
+            </div>
+
+            <h3>음성 업로드</h3>
+
+            <p>
+              회의 음성 파일을 선택하거나
+              화면에 끌어 놓습니다.
+            </p>
+          </article>
+
+          <article className="process-card">
+            <span className="process-number">
+              02
+            </span>
+
+            <div className="process-icon">
+              〽
+            </div>
+
+            <h3>음성 전사</h3>
+
+            <p>
+              RTZR STT가 음성을 분석하고
+              화자별 텍스트로 변환합니다.
+            </p>
+          </article>
+
+          <article className="process-card">
+            <span className="process-number">
+              03
+            </span>
+
+            <div className="process-icon">
+              ≡
+            </div>
+
+            <h3>회의록 정리</h3>
+
+            <p>
+              핵심 요약과 결정 사항,
+              실행 항목을 구조화합니다.
+            </p>
+          </article>
+
+          <article className="process-card">
+            <span className="process-number">
+              04
+            </span>
+
+            <div className="process-icon">
+              ↓
+            </div>
+
+            <h3>결과 다운로드</h3>
+
+            <p>
+              생성된 회의록을 Markdown
+              파일로 저장합니다.
+            </p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section
+  className="preview-section"
+  id="preview"
+>
+  <div className="container">
+    <div className="section-heading">
+      <p className="hero-label">
+        PREVIEW
+      </p>
+
+      <h2>
+        회의의 핵심을
+        <br />
+        한눈에 확인하세요.
+      </h2>
+
+      <p>
+        긴 전사문을 전부 읽지 않아도 핵심 요약,
+        결정 사항과 후속 업무를 빠르게 확인할 수 있습니다.
+      </p>
+    </div>
+
+    <div className="preview-result-card">
+      <div className="preview-result-header">
+        <div>
+          <span className="preview-label">
+            MEETING MINUTES
+          </span>
+
+          <h3>7월 마케팅 전략 회의</h3>
+        </div>
+
+        <span className="preview-complete">
+          생성 완료
+        </span>
+      </div>
+
+      <div className="preview-result-grid">
+        <article className="preview-result-item preview-summary-card">
+          <span className="preview-item-number">
+            01
+          </span>
+
+          <h4>핵심 요약</h4>
+
+          <p>
+            신제품 출시를 앞두고 SNS 캠페인과 광고 예산을 중심으로
+마케팅 전략을 논의했습니다.
+콘텐츠 제작 일정과 채널별 운영 방향을 확정하기로 했습니다.
+          </p>
+        </article>
+
+        <article className="preview-result-item">
+          <span className="preview-item-number">
+            02
+          </span>
+
+          <h4>결정 사항</h4>
+
+          <ul>
+            <li>
+              인스타그램과 유튜브를 핵심 홍보 채널로 운영합니다.
+            </li>
+            <li>
+              광고 예산은 디지털 광고에 우선 배분합니다.
+            </li>
+          </ul>
+        </article>
+
+        <article className="preview-result-item">
+          <span className="preview-item-number">
+            03
+          </span>
+
+          <h4>Action Items</h4>
+
+          <ul>
+            <li>
+              마케팅 콘텐츠 제작 일정을 이번 주까지 확정합니다.
+            </li>
+            <li>
+              광고 소재 시안을 금요일까지 공유합니다.
+            </li>
+          </ul>
+        </article>
+
+        <article className="preview-result-item">
+          <span className="preview-item-number">
+            04
+          </span>
+
+          <h4>주요 키워드</h4>
+
+          <div className="preview-keywords">
+            <span>마케팅</span>
+            <span>SNS</span>
+            <span>광고</span>
+            <span>콘텐츠</span>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+  </>
+)}
       </main>
     </div>
   );
