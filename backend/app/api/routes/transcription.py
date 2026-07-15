@@ -198,3 +198,98 @@ async def get_transcription_status(job_id: str):
                 "message": "해당 전사 작업을 찾을 수 없습니다.",
             },
         ) from exc
+        
+@router.get(
+    "/{job_id}/result",
+    summary="전사 결과 조회",
+    description="완료된 전사 작업의 전체 전사문과 화자별 발언을 조회합니다.",
+)
+async def get_transcription_result(job_id: str):
+    try:
+        job = job_service.get_internal_job(job_id)
+
+        if job["status"] == "failed":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "code": "TRANSCRIPTION_FAILED",
+                    "message": "전사 작업이 실패하여 결과를 조회할 수 없습니다.",
+                    "error": job.get("error"),
+                },
+            )
+
+        if job["status"] != "completed":
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail={
+                    "code": "RESULT_NOT_READY",
+                    "message": "아직 전사 작업이 완료되지 않았습니다.",
+                    "status": job["status"],
+                },
+            )
+
+        result = job.get("result")
+
+        if not isinstance(result, dict):
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={
+                    "code": "RESULT_NOT_FOUND",
+                    "message": "완료된 전사 결과를 찾을 수 없습니다.",
+                },
+            )
+
+        rtzr_results = result.get("results", {})
+        utterances = rtzr_results.get("utterances", [])
+
+        formatted_utterances = []
+        full_text_parts = []
+
+        for utterance in utterances:
+            text = str(utterance.get("msg", "")).strip()
+
+            if not text:
+                continue
+
+            speaker_number = int(utterance.get("spk", 0)) + 1
+            start_ms = int(utterance.get("start_at", 0))
+            duration_ms = int(utterance.get("duration", 0))
+
+            formatted_utterances.append(
+                {
+                    "speaker": speaker_number,
+                    "start_ms": start_ms,
+                    "duration_ms": duration_ms,
+                    "text": text,
+                }
+            )
+
+            full_text_parts.append(text)
+
+        return {
+            "success": True,
+            "data": {
+                "job_id": job["job_id"],
+                "status": job["status"],
+                "file": {
+                    "name": job["file"]["name"],
+                    "size": job["file"]["size"],
+                },
+                "transcript": {
+                    "full_text": " ".join(full_text_parts),
+                    "utterances": formatted_utterances,
+                },
+                "created_at": job["created_at"],
+                "updated_at": job["updated_at"],
+            },
+            "error": None,
+        }
+
+    except JobNotFoundError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "code": "JOB_NOT_FOUND",
+                "message": "해당 전사 작업을 찾을 수 없습니다.",
+            },
+        ) from exc
