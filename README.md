@@ -9,7 +9,7 @@
 
 # 프로젝트 소개
 
-Voice2Minutes는 음성 파일을 업로드하면 Return Zero STT API를 이용하여 음성을 텍스트로 변환하고, ai를 활용하여 회의록을 요약해주는 웹 애플리케이션입니다.
+Voice2Minutes는 음성 파일을 업로드하면 Return Zero STT API를 이용해 음성을 텍스트로 전사하고, Google Gemini AI를 활용해 핵심 요약, 결정 사항, Action Items, 주요 키워드를 자동으로 추출하여 구조화된 회의록을 생성하는 웹 애플리케이션입니다. 생성된 회의록은 웹에서 확인하거나 Markdown 파일로 다운로드할 수 있습니다.
 
 ---
 
