@@ -338,8 +338,6 @@ Markdown 다운로드
 
 RTZR 인증 토큰을 발급합니다.
 
----
-
 ### `backend/app/services/rtzr/client.py`
 
 RTZR API와 통신하는 공통 HTTP Client입니다.
