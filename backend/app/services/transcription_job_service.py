@@ -5,6 +5,10 @@ import time
 from typing import Any
 
 from app.services.file_service import delete_file
+from app.services.gemini_minutes_service import (
+    GeminiMinutesError,
+    gemini_minutes_service,
+)
 from app.services.job_service import JobNotFoundError, job_service
 from app.services.meeting_minutes_service import meeting_minutes_service
 from app.services.rtzr.polling import (
@@ -24,7 +28,10 @@ POLL_TIMEOUT_SECONDS = 3600
 async def process_transcription_job(job_id: str) -> None:
     """
     저장된 음성 파일을 RTZR에 전달하고,
-    전사 완료 후 구조화된 회의록을 생성한다.
+    전사 완료 후 Gemini 기반 회의록을 생성한다.
+
+    Gemini 호출이 실패하거나 API 키가 설정되지 않은 경우에는
+    기존 규칙 기반 회의록 생성 방식으로 자동 전환한다.
 
     상태 흐름:
     queued
@@ -33,7 +40,7 @@ async def process_transcription_job(job_id: str) -> None:
         → completed
 
     오류 발생 시:
-    queued / transcribing / summarizing
+    queued / transcribing
         → failed
     """
 
@@ -64,6 +71,7 @@ async def process_transcription_job(job_id: str) -> None:
             rtzr_transcribe_id=rtzr_transcribe_id,
         )
 
+        # RTZR 업로드가 끝난 뒤 로컬 임시 파일을 삭제한다.
         delete_file(stored_path)
         stored_path = None
 
@@ -78,7 +86,7 @@ async def process_transcription_job(job_id: str) -> None:
             error=None,
         )
 
-        meeting_minutes = meeting_minutes_service.create_minutes(
+        meeting_minutes = await create_meeting_minutes(
             transcript_result=transcript_result,
         )
 
@@ -122,12 +130,62 @@ async def process_transcription_job(job_id: str) -> None:
         _mark_job_failed(
             job_id=job_id,
             code="TRANSCRIPTION_PROCESS_FAILED",
-            message="전사 및 회의록 생성 중 예상하지 못한 오류가 발생했습니다.",
+            message=(
+                "전사 및 회의록 생성 중 "
+                "예상하지 못한 오류가 발생했습니다."
+            ),
         )
 
     finally:
         if stored_path:
             delete_file(stored_path)
+
+
+async def create_meeting_minutes(
+    *,
+    transcript_result: dict[str, Any],
+) -> dict[str, Any]:
+    """
+    Gemini 회의록 생성을 먼저 시도하고,
+    실패하면 기존 규칙 기반 분석 결과를 반환한다.
+    """
+
+    if gemini_minutes_service.is_configured:
+        try:
+            return await gemini_minutes_service.create_minutes(
+                transcript_result=transcript_result,
+            )
+
+        except GeminiMinutesError as exc:
+            fallback_result = meeting_minutes_service.create_minutes(
+                transcript_result=transcript_result,
+            )
+
+            fallback_result["generation_method"] = (
+                "rule_based_fallback"
+            )
+            fallback_result["fallback_reason"] = {
+                "code": exc.code,
+                "message": str(exc),
+                "status_code": exc.status_code,
+            }
+
+            return fallback_result
+
+    fallback_result = meeting_minutes_service.create_minutes(
+        transcript_result=transcript_result,
+    )
+
+    fallback_result["generation_method"] = "rule_based"
+    fallback_result["fallback_reason"] = {
+        "code": "GEMINI_NOT_CONFIGURED",
+        "message": (
+            "GEMINI_API_KEY가 설정되지 않아 "
+            "규칙 기반 분석을 사용했습니다."
+        ),
+    }
+
+    return fallback_result
 
 
 async def poll_transcription_result(

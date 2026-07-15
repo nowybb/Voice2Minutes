@@ -232,11 +232,18 @@ async def get_transcription_result(job_id: str):
                     [],
                 ),
                 "transcript": meeting_minutes.get(
-                    "transcript",
-                    {},
-                ),
-                "created_at": job["created_at"],
-                "updated_at": job["updated_at"],
+    "transcript",
+    {},
+),
+"generation_method": meeting_minutes.get(
+    "generation_method",
+    "unknown",
+),
+"fallback_reason": meeting_minutes.get(
+    "fallback_reason",
+),
+"created_at": job["created_at"],
+"updated_at": job["updated_at"],
             },
             "error": None,
         }
