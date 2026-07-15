@@ -201,8 +201,11 @@ async def get_transcription_status(job_id: str):
         
 @router.get(
     "/{job_id}/result",
-    summary="전사 결과 조회",
-    description="완료된 전사 작업의 전체 전사문과 화자별 발언을 조회합니다.",
+    summary="회의록 결과 조회",
+    description=(
+        "완료된 전사 작업의 핵심 요약, 결정 사항, "
+        "실행 항목, 키워드와 전체 전사문을 조회합니다."
+    ),
 )
 async def get_transcription_result(job_id: str):
     try:
@@ -223,7 +226,7 @@ async def get_transcription_result(job_id: str):
                 status_code=status.HTTP_409_CONFLICT,
                 detail={
                     "code": "RESULT_NOT_READY",
-                    "message": "아직 전사 작업이 완료되지 않았습니다.",
+                    "message": "아직 회의록 생성이 완료되지 않았습니다.",
                     "status": job["status"],
                 },
             )
@@ -235,36 +238,20 @@ async def get_transcription_result(job_id: str):
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail={
                     "code": "RESULT_NOT_FOUND",
-                    "message": "완료된 전사 결과를 찾을 수 없습니다.",
+                    "message": "완료된 회의록 결과를 찾을 수 없습니다.",
                 },
             )
 
-        rtzr_results = result.get("results", {})
-        utterances = rtzr_results.get("utterances", [])
+        meeting_minutes = result.get("meeting_minutes")
 
-        formatted_utterances = []
-        full_text_parts = []
-
-        for utterance in utterances:
-            text = str(utterance.get("msg", "")).strip()
-
-            if not text:
-                continue
-
-            speaker_number = int(utterance.get("spk", 0)) + 1
-            start_ms = int(utterance.get("start_at", 0))
-            duration_ms = int(utterance.get("duration", 0))
-
-            formatted_utterances.append(
-                {
-                    "speaker": speaker_number,
-                    "start_ms": start_ms,
-                    "duration_ms": duration_ms,
-                    "text": text,
-                }
+        if not isinstance(meeting_minutes, dict):
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={
+                    "code": "MEETING_MINUTES_NOT_FOUND",
+                    "message": "구조화된 회의록 결과를 찾을 수 없습니다.",
+                },
             )
-
-            full_text_parts.append(text)
 
         return {
             "success": True,
@@ -275,10 +262,29 @@ async def get_transcription_result(job_id: str):
                     "name": job["file"]["name"],
                     "size": job["file"]["size"],
                 },
-                "transcript": {
-                    "full_text": " ".join(full_text_parts),
-                    "utterances": formatted_utterances,
-                },
+                "summary": meeting_minutes.get(
+                    "summary",
+                    "요약 정보가 없습니다.",
+                ),
+                "decisions": meeting_minutes.get(
+                    "decisions",
+                    [],
+                ),
+                "action_items": meeting_minutes.get(
+                    "action_items",
+                    [],
+                ),
+                "keywords": meeting_minutes.get(
+                    "keywords",
+                    [],
+                ),
+                "transcript": meeting_minutes.get(
+                    "transcript",
+                    {
+                        "full_text": "",
+                        "utterances": [],
+                    },
+                ),
                 "created_at": job["created_at"],
                 "updated_at": job["updated_at"],
             },
