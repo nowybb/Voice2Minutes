@@ -6,6 +6,7 @@ from typing import Any
 
 from app.services.file_service import delete_file
 from app.services.job_service import JobNotFoundError, job_service
+from app.services.meeting_minutes_service import meeting_minutes_service
 from app.services.rtzr.polling import (
     RTZRPollingError,
     rtzr_polling_service,
@@ -22,15 +23,17 @@ POLL_TIMEOUT_SECONDS = 3600
 
 async def process_transcription_job(job_id: str) -> None:
     """
-    저장된 음성 파일을 RTZR에 전달하고 전사 완료까지 상태를 조회한다.
+    저장된 음성 파일을 RTZR에 전달하고,
+    전사 완료 후 구조화된 회의록을 생성한다.
 
     상태 흐름:
     queued
         → transcribing
+        → summarizing
         → completed
 
     오류 발생 시:
-    queued 또는 transcribing
+    queued / transcribing / summarizing
         → failed
     """
 
@@ -61,17 +64,35 @@ async def process_transcription_job(job_id: str) -> None:
             rtzr_transcribe_id=rtzr_transcribe_id,
         )
 
-        # RTZR 업로드가 끝났으므로 로컬 임시 파일을 삭제한다.
         delete_file(stored_path)
         stored_path = None
 
-        await poll_transcription_result(
+        transcript_result = await poll_transcription_result(
             job_id=job_id,
             rtzr_transcribe_id=rtzr_transcribe_id,
         )
 
+        job_service.update_job(
+            job_id,
+            status="summarizing",
+            error=None,
+        )
+
+        meeting_minutes = meeting_minutes_service.create_minutes(
+            transcript_result=transcript_result,
+        )
+
+        job_service.update_job(
+            job_id,
+            status="completed",
+            result={
+                "raw_transcription": transcript_result,
+                "meeting_minutes": meeting_minutes,
+            },
+            error=None,
+        )
+
     except JobNotFoundError:
-        # 작업이 이미 삭제된 경우 추가 상태 갱신을 하지 않는다.
         return
 
     except RTZRTranscriptionError as exc:
@@ -101,7 +122,7 @@ async def process_transcription_job(job_id: str) -> None:
         _mark_job_failed(
             job_id=job_id,
             code="TRANSCRIPTION_PROCESS_FAILED",
-            message="전사 작업 처리 중 예상하지 못한 오류가 발생했습니다.",
+            message="전사 및 회의록 생성 중 예상하지 못한 오류가 발생했습니다.",
         )
 
     finally:
@@ -113,14 +134,10 @@ async def poll_transcription_result(
     *,
     job_id: str,
     rtzr_transcribe_id: str,
-) -> None:
+) -> dict[str, Any]:
     """
-    RTZR 전사 결과를 일정 간격으로 조회한다.
-
-    RTZR 상태:
-    - transcribing: 전사 진행 중
-    - completed: 전사 완료
-    - failed: 전사 실패
+    RTZR 전사 결과를 일정 간격으로 조회하고,
+    완료된 원본 응답을 반환한다.
     """
 
     started_at = time.monotonic()
@@ -138,13 +155,7 @@ async def poll_transcription_result(
         rtzr_status = result.get("status")
 
         if rtzr_status == "completed":
-            job_service.update_job(
-                job_id,
-                status="completed",
-                result=result,
-                error=None,
-            )
-            return
+            return result
 
         if rtzr_status == "failed":
             error = _extract_rtzr_error(result)
@@ -155,7 +166,11 @@ async def poll_transcription_result(
                 result=None,
                 error=error,
             )
-            return
+
+            raise RTZRPollingError(
+                error["message"],
+                code=error["code"],
+            )
 
         if rtzr_status != "transcribing":
             raise RTZRPollingError(
@@ -172,7 +187,10 @@ def _extract_rtzr_error(
 
     if isinstance(error, dict):
         return {
-            "code": error.get("code", "RTZR_TRANSCRIPTION_FAILED"),
+            "code": error.get(
+                "code",
+                "RTZR_TRANSCRIPTION_FAILED",
+            ),
             "message": error.get(
                 "message",
                 "RTZR 전사 작업에 실패했습니다.",
