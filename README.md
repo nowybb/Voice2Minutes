@@ -263,7 +263,7 @@ AI 요약
 
 # 주요 코드 설명
 
-## Backend
+>## Backend
 
 ### `backend/app/main.py`
 
@@ -332,7 +332,7 @@ Markdown 다운로드
 
 민감한 정보는 `.env`에서 관리합니다.
 
-## RTZR API
+>## RTZR API
 
 ### `backend/app/services/rtzr/auth.py`
 
@@ -377,7 +377,7 @@ RTZR STT API를 호출하여 음성 파일을 전사합니다.
 완료
 ```
 
-## AI Service
+>## AI Service
 
 ### `backend/app/services/gemini_minutes_service.py`
 
@@ -475,7 +475,7 @@ AMR
 - 핵심 키워드
 - 전체 전사문
 
-## Frontend
+>## Frontend
 
 ### `frontend/src/services/api.js`
 
