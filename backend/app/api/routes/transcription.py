@@ -22,6 +22,16 @@ from app.services.transcription_job_service import (
     process_transcription_job,
 )
 
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    File,
+    Form,
+    HTTPException,
+    Response,
+    UploadFile,
+    status,
+)
 
 router = APIRouter(
     prefix="/transcriptions",
@@ -299,3 +309,120 @@ async def get_transcription_result(job_id: str):
                 "message": "해당 전사 작업을 찾을 수 없습니다.",
             },
         ) from exc
+        
+@router.get(
+    "/{job_id}/markdown",
+    summary="Markdown 회의록 다운로드",
+)
+async def download_markdown(job_id: str):
+    try:
+        job = job_service.get_internal_job(job_id)
+
+        if job["status"] != "completed":
+            raise HTTPException(
+                status_code=409,
+                detail="회의록 생성이 완료되지 않았습니다.",
+            )
+
+        meeting_minutes = job["result"]["meeting_minutes"]
+
+        markdown = build_markdown(
+            job["file"]["name"],
+            meeting_minutes,
+            job["created_at"],
+        )
+
+        filename = (
+            job["file"]["name"]
+            .rsplit(".", 1)[0]
+            + "_minutes.md"
+        )
+
+        return Response(
+            content=markdown,
+            media_type="text/markdown",
+            headers={
+                "Content-Disposition":
+                f'attachment; filename="{filename}"'
+            },
+        )
+
+    except JobNotFoundError:
+        raise HTTPException(
+            status_code=404,
+            detail="Job not found.",
+        )
+        
+def build_markdown(
+    file_name: str,
+    meeting_minutes: dict,
+    created_at: str,
+):
+    summary = meeting_minutes.get("summary", "")
+
+    decisions = meeting_minutes.get(
+        "decisions",
+        [],
+    )
+
+    actions = meeting_minutes.get(
+        "action_items",
+        [],
+    )
+
+    keywords = meeting_minutes.get(
+        "keywords",
+        [],
+    )
+
+    transcript = meeting_minutes.get(
+        "transcript",
+        {},
+    )
+
+    md = f"""# Voice2Minutes 회의록
+
+## 파일명
+
+{file_name}
+
+## 생성일
+
+{created_at}
+
+## 핵심 요약
+
+{summary}
+
+## 결정 사항
+"""
+
+    if decisions:
+        for decision in decisions:
+            md += f"- {decision['content']}\n"
+    else:
+        md += "- 없음\n"
+
+    md += "\n## Action Items\n"
+
+    if actions:
+        for action in actions:
+            md += f"- [ ] {action['task']}\n"
+    else:
+        md += "- 없음\n"
+
+    md += "\n## 키워드\n"
+
+    if keywords:
+        md += ", ".join(keywords)
+    else:
+        md += "없음"
+
+    md += "\n\n## 전체 전사\n\n"
+
+    md += transcript.get(
+        "full_text",
+        "",
+    )
+
+    return md
