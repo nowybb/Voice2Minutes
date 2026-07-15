@@ -67,6 +67,7 @@ Voice2Minutes
 │   │   │   │   ├── polling.py
 │   │   │   │   └── transcription.py
 │   │   │   ├── gemini_minutes_service.py
+│   │   │   ├── meeting_minutes_service.py
 │   │   │   ├── transcription_job_service.py
 │   │   │   ├── markdown_service.py
 │   │   │   ├── file_service.py
