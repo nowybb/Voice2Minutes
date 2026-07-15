@@ -1,0 +1,15 @@
+__pycache__/
+*.pyc
+
+.env
+
+uploads/
+outputs/
+
+.venv/
+venv/
+
+.idea/
+.vscode/
+
+.DS_Storexa
