@@ -3,9 +3,10 @@ function Header() {
     <header className="header">
       <div className="container header-inner">
 
-        <div className="logo">
-          Voice2Minutes
-        </div>
+        <a href="#" className="logo">
+  Voice2Minutes
+</a>
+
 
         <nav className="nav">
           <a href="#features">Features</a>
@@ -13,9 +14,7 @@ function Header() {
           <a href="#preview">Preview</a>
         </nav>
 
-        <button className="primary-btn">
-          Start
-        </button>
+        
 
       </div>
     </header>
