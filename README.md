@@ -140,15 +140,6 @@ cd backend
 pip install -r requirements.txt
 ```
 
-환경 변수 설정
-
-`.env` 파일을 생성한 뒤 아래 내용을 입력합니다.
-
-```env
-RTZR_CLIENT_ID=YOUR_CLIENT_ID
-RTZR_CLIENT_SECRET=YOUR_CLIENT_SECRET
-```
-
 서버 실행
 
 ```bash
@@ -164,7 +155,7 @@ http://localhost:8000
 
 ## 3. Frontend 실행
 
-새 터미널을 열어 frontend 디렉터리로 이동합니다.
+frontend 디렉터리로 이동
 
 ```bash
 cd frontend
@@ -176,18 +167,17 @@ cd frontend
 npm install
 ```
 
-개발 서버 실행
+서버 실행
 
 ```bash
 npm run dev
 ```
 
-브라우저에서 아래 주소로 접속합니다.
+기본 주소
 
 ```
 http://localhost:5173
 ```
-
 
 ## 4. 사용 방법
 
@@ -211,7 +201,7 @@ RTZR_CLIENT_SECRET=YOUR_RTZR_CLIENT_SECRET
 
 # Google Gemini API
 GEMINI_API_KEY=YOUR_GEMINI_API_KEY
-GEMINI_MODEL=gemini-2.5-flash-lite
+GEMINI_MODEL=gemini-3-flash-preview
 ```
 
 ## Frontend
@@ -219,7 +209,7 @@ GEMINI_MODEL=gemini-2.5-flash-lite
 `frontend/.env` 파일을 생성합니다.
 
 ```env
-VITE_API_BASE_URL=http://localhost:8000/api/v1
+VITE_API_BASE_URL=http://127.0.0.1:8000/api/v1
 ```
 
 > **주의**
