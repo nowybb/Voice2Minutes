@@ -267,6 +267,33 @@ function App() {
     }
   };
 
+  const handleGoHome = () => {
+  resetJobState();
+
+  setSelectedFile(null);
+  setErrorMessage("");
+  setIsDragging(false);
+
+  setUseDiarization(true);
+  setRemoveDisfluency(true);
+  setSplitParagraph(true);
+
+  if (fileInputRef.current) {
+    fileInputRef.current.value = "";
+  }
+
+  window.history.replaceState(
+    null,
+    "",
+    window.location.pathname
+  );
+
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+};
+
   const handleGenerate = async () => {
     if (!selectedFile) {
       setErrorMessage(
@@ -376,7 +403,7 @@ function App() {
 
   return (
     <div className="app">
-      <Header />
+      <Header onLogoClick={handleGoHome} />
 
       <main>
         <section className="hero-section">
