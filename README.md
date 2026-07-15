@@ -89,8 +89,7 @@ Voice2Minutes
 │   │   ├── App.jsx
 │   │   └── main.jsx
 │   ├── package.json
-│   ├── vite.config.js
-│   └── .env
+│   └── vite.config.js
 │
 └── README.md
 ```
