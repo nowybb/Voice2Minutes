@@ -105,6 +105,10 @@ function App() {
     "summarizing",
   ].includes(jobStatus);
 
+  // 회의록 생성 버튼을 누른 뒤에는 옵션을 변경할 수 없도록 잠급니다.
+  // 홈으로 돌아가거나 새 파일을 선택해 상태가 idle이 되면 다시 활성화됩니다.
+  const isOptionLocked = jobStatus !== "idle";
+
   useEffect(() => {
     return () => {
       if (pollingTimerRef.current) {
@@ -546,7 +550,13 @@ function App() {
               />
 
               <div className="upload-options">
-                <label>
+                <label
+                  className={
+                    isOptionLocked
+                      ? "option-locked"
+                      : ""
+                  }
+                >
                   <input
                     type="checkbox"
                     checked={useDiarization}
@@ -555,13 +565,19 @@ function App() {
                         event.target.checked
                       )
                     }
-                    disabled={isProcessing}
+                    disabled={isOptionLocked}
                   />
 
                   <span>화자 분리</span>
                 </label>
 
-                <label>
+                <label
+                  className={
+                    isOptionLocked
+                      ? "option-locked"
+                      : ""
+                  }
+                >
                   <input
                     type="checkbox"
                     checked={removeDisfluency}
@@ -570,13 +586,19 @@ function App() {
                         event.target.checked
                       )
                     }
-                    disabled={isProcessing}
+                    disabled={isOptionLocked}
                   />
 
                   <span>간투어 제거</span>
                 </label>
 
-                <label>
+                <label
+                  className={
+                    isOptionLocked
+                      ? "option-locked"
+                      : ""
+                  }
+                >
                   <input
                     type="checkbox"
                     checked={splitParagraph}
@@ -585,7 +607,7 @@ function App() {
                         event.target.checked
                       )
                     }
-                    disabled={isProcessing}
+                    disabled={isOptionLocked}
                   />
 
                   <span>문단 나누기</span>
